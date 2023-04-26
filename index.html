@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+    <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>App-chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+<script>
+    //web-chat-firebase2
+        var firebaseConfig = {
+            apiKey: "AIzaSyCUxOjOItuwBLPzqdJL_t9E2w4dKgKydE8",
+            authDomain: "web-chat-firebase-2.firebaseapp.com",
+            databaseURL: "https://web-chat-firebase-2-default-rtdb.firebaseio.com",
+            projectId: "web-chat-firebase-2",
+            storageBucket: "web-chat-firebase-2.appspot.com",
+            messagingSenderId: "652119535167",
+            appId: "1:652119535167:web:40dffc35ad1a4d39bc128a"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        var database = firebase.database();
+
+        var url_string = window.location.href;
+        var url = new URL(url_string);
+        var name = url.searchParams.get("uid");
+        // var uname = document.getElementById("uname").value;
+
+
+        function sendMsg(){
+            var msg = document.getElementById("msg").value;
+            firebase.database().ref('messages/').push().set({
+                usename: name,
+                message: msg
+            });
+        document.getElementById("msg").value="";
+        document.getElementById("dimg").src="img/mic.png";
+        }
+</script>
+</head>
+<body>
+<div class="container">
+    <div class="chat">
+        <div class="chat-header">
+            <div class="profile">
+                <div class="left">
+                    <img src="img/arrow.png" class="arrow">
+                    <img src="img/pp.png" class="pp">
+                    <h2 id="username">////</h2>
+                    <span>online</span>
+                </div>
+            <div class="right">
+                <img src="img/video.png" class="icon">
+                <img src="img/phone.png" class="icon">
+                <img src="img/more.png" class="icon">
+            </div>
+            </div>
+        </div>
+        <div id="chatData" class="chat-box">
+              <!-- <div class="chat-r">
+                <div class="sp"></div>
+                <div class="mess mess-r">
+                    <p>
+                    Hi, Sai
+                    </p>
+                    <div class="check">
+                        <span>4:00 PM</span>
+                        <img src="img/check-2.png">
+                    </div>
+                </div>
+            </div>
+            <div class="chat-l">
+                <div class="mess">
+                    <p>
+                    Oh! hi 🙌
+                    </p>
+                    <div class="check">
+                    <span>4:00 PM</span>
+                    </div>
+                </div>
+            <div class="sp"></div>
+            </div>  -->
+        </div> 
+
+        <div class="chat-footer">
+            <img src="img/emo.png" class="emo">
+            <textarea id="msg" oninput="dText()" placeholder="Type a message"></textarea>
+        <div class="icons">
+            <img src="img/attach file.png">
+            <img src="img/camera.png">
+        </div>
+            <img id="dimg" src="img/mic.png" onclick="sendMsg()" class="mic">
+        </div>
+    </div>
+</div>
+<script>
+        document.getElementById("username").innerHTML=name;
+
+    var input = document.getElementById("msg");
+        input.addEventListener("keyup", function(event){
+            if(event.keyCode == 13)
+            {
+                event.preventDefault();
+                sendMsg();
+            }
+        });
+
+
+    function dText(){
+        var msg = document.getElementById("msg").value;
+        if(msg==""){
+            document.getElementById("dimg").src="img/mic.png";
+        }
+        else{
+            document.getElementById("dimg").src="img/emo.png";
+        }
+    }
+
+
+
+    firebase.database().ref('messages/').on('child_added', function(snapshot){
+            
+            var html ="";
+            if(name==snapshot.val().usename){
+             html+='<div class="chat-r" data-id='+snapshot.key+' onclick="deleteMsg(this)">';
+                html+='<div class="sp"></div>';
+                html+='<div class="mess mess-r">';
+                    html+="<p id ='message- "+snapshot.key+"'>";
+                    html+='<p>'+snapshot.val().message+'</p>';
+                    html+='<h6>You</h6>';
+                    html+='<button data-id="'+snapshot.key+'" onclick="deleteMsg(this)">delete</button>';
+                    html+='<div class="check">';
+                        html+='<span>4:00 PM</span>';
+                        html+='<img src="img/check-2.png">';
+                        html+='</div>';
+                        html+='</div>';
+} 
+        else{
+            html+='<div class="chat-l">';
+                html+='<div class="mess mess-r">';
+                    html+='<p>'+snapshot.val().message+'</p>';
+                    html+='<h6 id= "uname">'+snapshot.val().usename+'</h6>';
+                        html+='<div class="check">';
+                            html+='<span>4:00 PM</span>';
+                            // html+='<img src="img/check-2.png">';
+                            html+='</div>';
+                            html+='<div class="sp"></div>';
+                            html+='</div>';
+
+         }    
+            document.getElementById('chatData').innerHTML+=html;
+});
+    firebase.database().ref('messages/').on("child_removed",function(snapshot) {
+        document.getElementById("message-"+ snapshot.key).innerHTML="message has removed";
+    });
+
+    function deleteMsg(val){
+        var msgId = val.getAttribute("data-id");
+        firebase.database().ref('messages/').child(msgId).remove();
+    }
+
+</script>
+</body>
+</html>  
